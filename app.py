@@ -1,48 +1,39 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Configuração da página
-st.set_page_config(page_title="EduAdapt - Materiais Adaptados", layout="wide")
+# Configuração visual
+st.set_page_config(page_title="EduAdapt", page_icon="🎓")
 
-# Título do seu projeto
-st.title("🎨 EduAdapt: Inclusão na Prática")
-st.subheader("Gerador de Material Pedagógico Adaptado")
+st.title("🎓 EduAdapt")
+st.markdown("### Ferramenta de Inclusão Pedagógica")
+st.info("Bem-vindo, Professor! Use esta ferramenta para adaptar seus materiais.")
 
-# Área para colocar a sua Chave da API (aquela que começa com AIza)
-# DICA: No futuro, podemos esconder isso por segurança, mas para testar agora, cole aqui.
-api_key = st.sidebar.text_input("Insira sua Chave API do Gemini:", type="password")
+# Barra lateral para configurações
+with st.sidebar:
+    st.header("Configuração")
+    api_key = st.text_input("Insira sua Chave API:", type="password")
+    modelo = st.selectbox("Modelo de IA:", ["gemini-1.5-flash"])
 
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(modelo)
 
-    # Espaço para o professor colar o conteúdo da aula normal
-    st.write("### 1. Cole aqui o conteúdo original da aula:")
-    conteudo_original = st.text_area("Ex: Capítulo 2: Da Forma à Imagem (6º Ano)", height=200)
+        # Interface Principal
+        st.write("---")
+        materia = st.text_input("Qual a matéria? (Ex: Filosofia, Artes, Sociologia)")
+        conteudo = st.text_area("Cole aqui o conteúdo original da aula:", height=250)
 
-    if st.button("Adaptar Aula para Aluno DI"):
-        if conteudo_original:
-            with st.spinner('Criando material adaptado...'):
-                # O "comando" mágico que a IA vai seguir
-                prompt = f"""
-                Você é um professor especialista em Educação Especial. 
-                Adapte o conteúdo abaixo para um aluno com Deficiência Intelectual (DI) do 6º ano.
-                Use linguagem simples, frases curtas, metáforas visuais e foque no essencial.
-                
-                Conteúdo Original:
-                {conteudo_original}
-                
-                Estrutura da resposta:
-                1. Título do Capítulo (Simplicado)
-                2. Conceitos principais explicados de forma visual.
-                3. Uma atividade simples para fazer em casa com a família.
-                """
-                
-                response = model.generate_content(prompt)
-                st.markdown("---")
-                st.write("### ✨ Aula Adaptada:")
-                st.write(response.text)
-        else:
-            st.warning("Por favor, cole um conteúdo antes de adaptar.")
+        if st.button("✨ Adaptar Material"):
+            if conteudo:
+                with st.spinner('A IA está simplificando o material...'):
+                    prompt = f"Adapte o seguinte conteúdo de {materia} para um aluno com deficiência intelectual. Use linguagem clara, tópicos e foque nos pontos centrais: {conteudo}"
+                    response = model.generate_content(prompt)
+                    st.success("Material Adaptado com Sucesso!")
+                    st.markdown(response.text)
+            else:
+                st.warning("Por favor, insira o conteúdo da aula.")
+    except Exception as e:
+        st.error(f"Erro de conexão: {e}")
 else:
-    st.info("Por favor, insira sua chave API na barra lateral para começar.")
+    st.warning("👈 Por favor, insira sua Chave API na barra lateral para começar.")
