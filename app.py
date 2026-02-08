@@ -14,7 +14,7 @@ api_key = st.sidebar.text_input("Insira sua Chave API do Gemini:", type="passwor
 
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
     # Espaço para o professor colar o conteúdo da aula normal
     st.write("### 1. Cole aqui o conteúdo original da aula:")
